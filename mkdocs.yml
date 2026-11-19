@@ -1,0 +1,172 @@
+# =============================================================================
+# llm: MkDocs configuration
+#
+# Read top to bottom. What you edit often comes first, boilerplate last.
+#
+#   1. Site            who we are
+#   2. Navigation      what readers see, in reading order
+#   3. Look and feel   theme, extra CSS
+#   4. Writing         Markdown extensions, plugins
+#   5. Build checks    validation
+#
+# Status: design phase. `nav` lists only pages that exist under docs/.
+# Planned pages are commented out. Uncomment an entry in the same change
+# that creates its file.
+# =============================================================================
+
+# =============================================================================
+# 1. Site
+# =============================================================================
+site_name: llm
+site_description: A decoder-only language model written from scratch in Python
+site_author: Synobotix
+# site_url: set when the documentation is published
+# repo_name, repo_url, edit_uri: set when the remote repository URL is known
+
+copyright: Copyright &copy; 2026 Synobotix
+
+nav:
+  - Home: index.md
+
+  # - Overview:
+  #     - Architecture: overview/architecture.md
+  #     - Glossary: overview/glossary.md
+
+  # - Tokenizer:
+  #     - tokenizer/index.md
+  #     - Byte-level BPE: tokenizer/bpe.md
+
+  # - Data:
+  #     - data/index.md
+  #     - Preparation and shards: data/preparation.md
+
+  # - Model:
+  #     - model/index.md
+  #     - Causal self-attention: model/attention.md
+  #     - Transformer block: model/block.md
+
+  # - Training:
+  #     - training/index.md
+  #     - Optimizer and schedule: training/optimizer-schedule.md
+  #     - Checkpoints and resume: training/checkpoints.md
+
+  # - Inference and evaluation:
+  #     - inference/sampling.md
+  #     - eval/perplexity.md
+
+  # - Project:
+  #     - Repository layout: project/repository-layout.md
+  #     - Decisions (ADR): explanation/adr/index.md
+
+# =============================================================================
+# 3. Look and feel
+# =============================================================================
+theme:
+  name: material
+  language: en
+  font:
+    text: Inter
+    code: JetBrains Mono
+  icon:
+    repo: fontawesome/brands/github
+    logo: material/brain
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    # Navigation
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.tracking
+    - navigation.path
+    - navigation.footer
+    - toc.follow
+    # Search
+    - search.suggest
+    - search.highlight
+    - search.share
+    # Content
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+
+extra_css:
+  - assets/css/extra.css
+
+extra:
+  generator: false
+
+# =============================================================================
+# 4. Writing
+# =============================================================================
+plugins:
+  - search:
+      lang: en
+      separator: '[\s\-\.]+'
+
+markdown_extensions:
+  # Page structure
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+
+  # Code
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+  # Text formatting
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+# =============================================================================
+# 5. Build checks
+# =============================================================================
+validation:
+  links:
+    absolute_links: relative_to_docs
+    unrecognized_links: warn
+  omitted_files: warn
+  not_found: warn
+  anchors: warn

@@ -1,0 +1,99 @@
+# The node hooks (gitmoji, commitlint) use the Node.js already installed.
+default_language_version:
+  node: system
+
+# `pre-commit install` installs all three git hooks.
+default_install_hook_types: [pre-commit, prepare-commit-msg, commit-msg]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        # mkdocs.yml uses python tags (!!python/name:...) that safe_load rejects.
+        args: [--unsafe]
+      - id: check-toml
+      - id: check-added-large-files
+        # Datasets, tokenizer files and checkpoints stay out of git.
+        args: ["--maxkb=5000"]
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+
+  - repo: https://github.com/psf/black
+    rev: 26.10.1
+    hooks:
+      # Formats code in place. Default settings (line length 88).
+      - id: black
+
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.5.0
+    hooks:
+      - id: flake8
+        # E, W = pycodestyle, F = pyflakes, C90 = McCabe complexity
+        # flake8-bugbear (B) = likely bugs, flake8-simplify (SIM) = simplifications
+        # flake8-cognitive-complexity (CCR) = cognitive complexity
+        # E203 and W503 conflict with black.
+        args:
+          - --max-line-length=88
+          - --extend-ignore=E203,W503
+          - --max-complexity=10
+          - --max-cognitive-complexity=15
+        additional_dependencies:
+          - flake8-bugbear
+          - flake8-simplify
+          - flake8-cognitive-complexity
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v2.4.1
+    hooks:
+      - id: mypy
+        # Third-party packages (torch, numpy, ...) are not installed in the
+        # hook environment, so skip their stubs.
+        args: [--ignore-missing-imports]
+        files: ^src/.*\.py$
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.9.4
+    hooks:
+      - id: bandit
+        # Security linter: eval, pickle, hardcoded secrets, shell calls.
+        # Tests use assert, so skip them.
+        args: [--quiet, --exclude, ./tests]
+
+  # Planned: pytest hook. Add it in the same change that adds the first test
+  # and a `pyproject.toml` that declares the dependencies.
+
+  # Interactive gitmoji picker. Writes the first line of the commit message.
+  # At the title prompt, type "<type>(<scope>): <description>", for example
+  # "feat(tokenizer): add byte-level BPE". Settings are in .gitmojirc.json.
+  # Needs a terminal: it does nothing without one, and skips amend, merge and
+  # rebase.
+  - repo: local
+    hooks:
+      - id: gitmoji
+        name: gitmoji
+        language: node
+        additional_dependencies: ["gitmoji-cli@9.7.0"]
+        # pre-commit hides the output of a hook, so talk to the terminal directly.
+        entry: >-
+          bash -c 'exec 3<>/dev/tty || exit 0;
+          exec <&3 >&3 2>&3;
+          gitmoji --hook "$1" "$PRE_COMMIT_COMMIT_MSG_SOURCE"' --
+        stages: [prepare-commit-msg]
+        always_run: true
+
+  - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
+    rev: v9.27.0
+    hooks:
+      - id: commitlint
+        stages: [commit-msg]
+        # Rules are in .commitlintrc.js.
+        additional_dependencies:
+          - "@commitlint/config-conventional"
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.3
+    hooks:
+      - id: codespell
